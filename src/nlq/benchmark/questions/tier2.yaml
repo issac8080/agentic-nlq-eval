@@ -1,0 +1,116 @@
+# Scaffold: 5 original tier-2 questions (grouping and ranking). Gold values are SF0.01.
+- id: t2q01
+  tier: 2
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many customers are in each market segment, with the largest segment first?
+  gold_sql: >
+    SELECT market_segment, COUNT(*) AS customer_count
+    FROM customers
+    GROUP BY market_segment
+    ORDER BY customer_count DESC, market_segment
+  ordered: true
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {market_segment: BUILDING, customer_count: 337}
+      - {market_segment: AUTOMOBILE, customer_count: 302}
+      - {market_segment: HOUSEHOLD, customer_count: 294}
+      - {market_segment: MACHINERY, customer_count: 288}
+      - {market_segment: FURNITURE, customer_count: 279}
+    entities: [BUILDING, AUTOMOBILE, HOUSEHOLD, MACHINERY, FURNITURE]
+- id: t2q02
+  tier: 2
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Which shipping modes generated the most sale amount, highest first?
+  gold_sql: >
+    SELECT ship_mode, ROUND(SUM(sale_amount), 2) AS total_sale_amount
+    FROM order_lines
+    GROUP BY ship_mode
+    ORDER BY total_sale_amount DESC, ship_mode
+  ordered: true
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {ship_mode: TRUCK, total_sale_amount: "313178114.52"}
+      - {ship_mode: MAIL, total_sale_amount: "310589888.43"}
+      - {ship_mode: FOB, total_sale_amount: "307473870.52"}
+      - {ship_mode: REG AIR, total_sale_amount: "306936993.53"}
+      - {ship_mode: SHIP, total_sale_amount: "305720437.51"}
+      - {ship_mode: RAIL, total_sale_amount: "305082696.65"}
+      - {ship_mode: AIR, total_sale_amount: "303207759.31"}
+    entities: [TRUCK, MAIL, FOB, REG AIR, SHIP, RAIL, AIR]
+- id: t2q03
+  tier: 2
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Rank order priorities by how many orders use each priority.
+  gold_sql: >
+    SELECT order_priority, COUNT(*) AS order_count
+    FROM sales_orders
+    GROUP BY order_priority
+    ORDER BY order_count DESC, order_priority
+  ordered: true
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {order_priority: 2-HIGH, order_count: 3065}
+      - {order_priority: 4-NOT SPECIFIED, order_count: 3024}
+      - {order_priority: 1-URGENT, order_count: 3020}
+      - {order_priority: 5-LOW, order_count: 2950}
+      - {order_priority: 3-MEDIUM, order_count: 2941}
+    entities: [2-HIGH, 4-NOT SPECIFIED, 1-URGENT, 5-LOW, 3-MEDIUM]
+- id: t2q04
+  tier: 2
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Which five brands have the most parts?
+  gold_sql: >
+    SELECT brand, COUNT(*) AS part_count
+    FROM parts
+    GROUP BY brand
+    ORDER BY part_count DESC, brand
+    LIMIT 5
+  ordered: true
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {brand: Brand#35, part_count: 93}
+      - {brand: Brand#32, part_count: 88}
+      - {brand: Brand#33, part_count: 87}
+      - {brand: Brand#43, part_count: 87}
+      - {brand: Brand#52, part_count: 85}
+    entities: [Brand#35, Brand#32, Brand#33, Brand#43, Brand#52]
+- id: t2q05
+  tier: 2
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Which five nations have the most suppliers?
+  gold_sql: >
+    SELECT g.nation_name, COUNT(*) AS supplier_count
+    FROM suppliers AS s
+    INNER JOIN geography AS g ON s.nation_key = g.nation_key
+    GROUP BY g.nation_name
+    ORDER BY supplier_count DESC, g.nation_name
+    LIMIT 5
+  ordered: true
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {nation_name: UNITED STATES, supplier_count: 8}
+      - {nation_name: CHINA, supplier_count: 7}
+      - {nation_name: MOZAMBIQUE, supplier_count: 7}
+      - {nation_name: EGYPT, supplier_count: 6}
+      - {nation_name: KENYA, supplier_count: 6}
+    entities: [UNITED STATES, CHINA, MOZAMBIQUE, EGYPT, KENYA]

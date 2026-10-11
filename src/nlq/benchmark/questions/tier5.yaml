@@ -1,0 +1,152 @@
+# Scaffold: 5 original tier-5 questions (multi-table joins, nested aggregation, rank within groups).
+- id: t5q01
+  tier: 5
+  dataset: tpch
+  reference_scale: sf0.01
+  question: What is total profit by customer region, highest region first?
+  gold_sql: >
+    SELECT g.region_name, ROUND(SUM(ol.profit), 2) AS total_profit
+    FROM order_lines AS ol
+    INNER JOIN sales_orders AS o ON ol.order_key = o.order_key
+    INNER JOIN customers AS c ON o.customer_key = c.customer_key
+    INNER JOIN geography AS g ON c.nation_key = g.nation_key
+    GROUP BY g.region_name
+    ORDER BY total_profit DESC, g.region_name
+  ordered: true
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {region_name: MIDDLE EAST, total_profit: "285265936.65"}
+      - {region_name: AFRICA, total_profit: "269227549.70"}
+      - {region_name: AMERICA, total_profit: "249261102.94"}
+      - {region_name: ASIA, total_profit: "249110788.44"}
+      - {region_name: EUROPE, total_profit: "233612230.06"}
+    entities: [MIDDLE EAST, AFRICA, AMERICA, ASIA, EUROPE]
+- id: t5q02
+  tier: 5
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Within each region, which nation produced the most profit?
+  gold_sql: >
+    WITH nation_profit AS (
+      SELECT g.region_name, g.nation_name, SUM(ol.profit) AS total_profit
+      FROM order_lines AS ol
+      INNER JOIN sales_orders AS o ON ol.order_key = o.order_key
+      INNER JOIN customers AS c ON o.customer_key = c.customer_key
+      INNER JOIN geography AS g ON c.nation_key = g.nation_key
+      GROUP BY g.region_name, g.nation_name
+    ),
+    ranked AS (
+      SELECT region_name, nation_name, total_profit,
+             ROW_NUMBER() OVER (PARTITION BY region_name ORDER BY total_profit DESC, nation_name) AS rn
+      FROM nation_profit
+    )
+    SELECT region_name, nation_name, ROUND(total_profit, 2) AS total_profit
+    FROM ranked WHERE rn = 1 ORDER BY region_name
+  ordered: true
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {region_name: AFRICA, nation_name: ALGERIA, total_profit: "59281946.18"}
+      - {region_name: AMERICA, nation_name: CANADA, total_profit: "66474232.67"}
+      - {region_name: ASIA, nation_name: JAPAN, total_profit: "55516830.26"}
+      - {region_name: EUROPE, nation_name: ROMANIA, total_profit: "56538699.13"}
+      - {region_name: MIDDLE EAST, nation_name: EGYPT, total_profit: "64844713.96"}
+    entities: [ALGERIA, CANADA, JAPAN, ROMANIA, EGYPT]
+- id: t5q03
+  tier: 5
+  dataset: tpch
+  reference_scale: sf0.01
+  question: For each ship mode, which order priority accounts for the most lines?
+  gold_sql: >
+    WITH mode_priority AS (
+      SELECT ship_mode, order_priority, COUNT(*) AS line_count
+      FROM order_lines AS ol
+      INNER JOIN sales_orders AS o ON ol.order_key = o.order_key
+      GROUP BY ship_mode, order_priority
+    ),
+    ranked AS (
+      SELECT ship_mode, order_priority, line_count,
+             ROW_NUMBER() OVER (PARTITION BY ship_mode ORDER BY line_count DESC, order_priority) AS rn
+      FROM mode_priority
+    )
+    SELECT ship_mode, order_priority, line_count FROM ranked WHERE rn = 1 ORDER BY ship_mode
+  ordered: true
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {ship_mode: AIR, order_priority: 5-LOW, line_count: 1732}
+      - {ship_mode: FOB, order_priority: 4-NOT SPECIFIED, line_count: 1798}
+      - {ship_mode: MAIL, order_priority: 2-HIGH, line_count: 1841}
+      - {ship_mode: RAIL, order_priority: 2-HIGH, line_count: 1777}
+      - {ship_mode: REG AIR, order_priority: 1-URGENT, line_count: 1787}
+      - {ship_mode: SHIP, order_priority: 4-NOT SPECIFIED, line_count: 1769}
+      - {ship_mode: TRUCK, order_priority: 2-HIGH, line_count: 1806}
+    entities: [AIR, FOB, MAIL, RAIL, REG AIR, SHIP, TRUCK]
+- id: t5q04
+  tier: 5
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many customers have total profit above the average customer in their own nation?
+  gold_sql: >
+    WITH customer_profit AS (
+      SELECT c.customer_key, c.nation_key, SUM(ol.profit) AS total_profit
+      FROM order_lines AS ol
+      INNER JOIN sales_orders AS o ON ol.order_key = o.order_key
+      INNER JOIN customers AS c ON o.customer_key = c.customer_key
+      GROUP BY c.customer_key, c.nation_key
+    ),
+    nation_avg AS (
+      SELECT nation_key, AVG(total_profit) AS avg_profit
+      FROM customer_profit GROUP BY nation_key
+    )
+    SELECT COUNT(*) AS customers_above_nation_avg
+    FROM customer_profit AS cp
+    INNER JOIN nation_avg AS na ON cp.nation_key = na.nation_key
+    WHERE cp.total_profit > na.avg_profit
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {customers_above_nation_avg: 463}
+    entities: []
+- id: t5q05
+  tier: 5
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Within each supplier region, which supplier earned the most profit?
+  gold_sql: >
+    WITH supplier_region AS (
+      SELECT g.region_name, s.supplier_name, SUM(ol.profit) AS total_profit
+      FROM order_lines AS ol
+      INNER JOIN suppliers AS s ON ol.supplier_key = s.supplier_key
+      INNER JOIN geography AS g ON s.nation_key = g.nation_key
+      GROUP BY g.region_name, s.supplier_name
+    ),
+    ranked AS (
+      SELECT region_name, supplier_name, total_profit,
+             ROW_NUMBER() OVER (PARTITION BY region_name ORDER BY total_profit DESC, supplier_name) AS rn
+      FROM supplier_region
+    )
+    SELECT region_name, supplier_name, ROUND(total_profit, 2) AS total_profit
+    FROM ranked WHERE rn = 1 ORDER BY region_name
+  ordered: true
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {region_name: AFRICA, supplier_name: "Supplier#000000047", total_profit: "14097805.54"}
+      - {region_name: AMERICA, supplier_name: "Supplier#000000021", total_profit: "14181352.90"}
+      - {region_name: ASIA, supplier_name: "Supplier#000000060", total_profit: "14605663.51"}
+      - {region_name: EUROPE, supplier_name: "Supplier#000000033", total_profit: "15285868.04"}
+      - {region_name: MIDDLE EAST, supplier_name: "Supplier#000000097", total_profit: "14425469.15"}
+    entities: ["Supplier#000000047", "Supplier#000000021", "Supplier#000000060", "Supplier#000000033", "Supplier#000000097"]

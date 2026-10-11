@@ -1,0 +1,85 @@
+# Scaffold: 5 original tier-3 questions (filters and multiple conditions). Gold values are SF0.01.
+- id: t3q01
+  tier: 3
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many order lines shipped by AIR during 1995?
+  gold_sql: >
+    SELECT COUNT(*) AS air_lines FROM order_lines
+    WHERE ship_mode = 'AIR'
+      AND ship_date >= DATE '1995-01-01'
+      AND ship_date < DATE '1996-01-01'
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {air_lines: 1225}
+    entities: [AIR]
+- id: t3q02
+  tier: 3
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many AUTOMOBILE customers have an account balance above 5000?
+  gold_sql: >
+    SELECT COUNT(*) AS customer_count FROM customers
+    WHERE market_segment = 'AUTOMOBILE' AND account_balance > 5000
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {customer_count: 143}
+    entities: [AUTOMOBILE]
+- id: t3q03
+  tier: 3
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many parts of size 40 or larger are packed in a MED BOX?
+  gold_sql: >
+    SELECT COUNT(*) AS part_count FROM parts
+    WHERE size >= 40 AND container = 'MED BOX'
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {part_count: 7}
+    entities: [MED BOX]
+- id: t3q04
+  tier: 3
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many urgent orders were placed in 1994?
+  gold_sql: >
+    SELECT COUNT(*) AS urgent_orders FROM sales_orders
+    WHERE order_priority = '1-URGENT'
+      AND order_date >= DATE '1994-01-01'
+      AND order_date < DATE '1995-01-01'
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {urgent_orders: 471}
+    entities: [1-URGENT]
+- id: t3q05
+  tier: 3
+  dataset: tpch
+  reference_scale: sf0.01
+  question: What is the total profit on returned lines that shipped by truck?
+  gold_sql: >
+    SELECT ROUND(SUM(profit), 2) AS total_profit FROM order_lines
+    WHERE return_flag = 'R' AND ship_mode = 'TRUCK'
+  ordered: false
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {total_profit: "47552420.53"}
+    entities: [TRUCK]

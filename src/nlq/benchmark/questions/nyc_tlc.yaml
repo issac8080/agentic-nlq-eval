@@ -1,0 +1,92 @@
+# Scaffold: 5 original NYC TLC questions. Gold values match the documented demonstration fixture
+# in nlq.data.nyc_tlc, not a full TLC month. Recompute after preparing real months.
+- id: nyc01
+  tier: 1
+  dataset: nyc_tlc
+  reference_scale: fixture
+  question: How many taxi trips are in the cleaned trip log?
+  gold_sql: SELECT COUNT(*) AS trip_count FROM taxi_trips
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {trip_count: 5}
+    entities: []
+- id: nyc02
+  tier: 2
+  dataset: nyc_tlc
+  reference_scale: fixture
+  question: What is total fare amount by pickup borough, highest first?
+  gold_sql: >
+    SELECT z.borough, ROUND(SUM(t.fare_amount), 2) AS total_fare
+    FROM taxi_trips AS t
+    INNER JOIN taxi_zones AS z ON t.pickup_zone_id = z.zone_id
+    GROUP BY z.borough
+    ORDER BY total_fare DESC, z.borough
+  ordered: true
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {borough: Brooklyn, total_fare: "50.0"}
+      - {borough: Manhattan, total_fare: "27.0"}
+      - {borough: Queens, total_fare: "12.0"}
+    entities: [Brooklyn, Manhattan, Queens]
+- id: nyc03
+  tier: 3
+  dataset: nyc_tlc
+  reference_scale: fixture
+  question: What is the average tip on credit-card trips?
+  gold_sql: >
+    SELECT ROUND(AVG(tip_amount), 2) AS average_tip
+    FROM taxi_trips
+    WHERE payment_type = 'credit_card'
+  ordered: false
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {average_tip: "3.5"}
+    entities: [credit_card]
+- id: nyc04
+  tier: 3
+  dataset: nyc_tlc
+  reference_scale: fixture
+  question: How many January trips carried more than one passenger?
+  gold_sql: >
+    SELECT COUNT(*) AS trip_count FROM taxi_trips
+    WHERE CAST(pickup_datetime AS TIMESTAMP) >= TIMESTAMP '2023-01-01 00:00:00'
+      AND CAST(pickup_datetime AS TIMESTAMP) < TIMESTAMP '2023-02-01 00:00:00'
+      AND passenger_count > 1
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {trip_count: 2}
+    entities: []
+- id: nyc05
+  tier: 5
+  dataset: nyc_tlc
+  reference_scale: fixture
+  question: Which dropoff zone received the most trips?
+  gold_sql: >
+    SELECT z.zone_name, z.borough, COUNT(*) AS trip_count
+    FROM taxi_trips AS t
+    INNER JOIN taxi_zones AS z ON t.dropoff_zone_id = z.zone_id
+    GROUP BY z.zone_name, z.borough
+    ORDER BY trip_count DESC, z.zone_name
+    LIMIT 1
+  ordered: true
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {zone_name: Midtown, borough: Manhattan, trip_count: 3}
+    entities: [Midtown, Manhattan]

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NLQ evaluation demo</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <p class="eyebrow">Research demonstration</p>
+      <h1>Natural-language questions over relational data</h1>
+    </div>
+    <p class="lede">Same model, same schema, three answering methods. This page only reads the benchmark and finished logs.</p>
+  </header>
+
+  <section class="systems" id="systems"></section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab is-on" data-panel="questions" type="button">Questions</button>
+    <button class="tab" data-panel="results" type="button">Results</button>
+  </nav>
+
+  <main id="questions" class="panel is-on">
+    <div class="filters" id="filters"></div>
+    <div class="layout">
+      <ul class="list" id="question-list"></ul>
+      <article class="detail" id="question-detail"></article>
+    </div>
+  </main>
+
+  <main id="results" class="panel">
+    <div class="results-bar">
+      <label>Experiment log
+        <select id="run-select"></select>
+      </label>
+      <p id="run-note"></p>
+    </div>
+    <div class="metric-row" id="metrics"></div>
+    <div class="layout">
+      <ul class="list" id="result-list"></ul>
+      <article class="detail" id="result-detail"></article>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

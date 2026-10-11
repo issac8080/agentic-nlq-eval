@@ -1,0 +1,71 @@
+# Scaffold: 5 original tier-1 questions. Gold values are SF0.01. Not from the TPC-H query set.
+- id: t1q01
+  tier: 1
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many sales orders are in the order history?
+  gold_sql: SELECT COUNT(*) AS order_count FROM sales_orders
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {order_count: 15000}
+    entities: []
+- id: t1q02
+  tier: 1
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many nations are listed in the geography reference?
+  gold_sql: SELECT COUNT(*) AS nation_count FROM geography
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {nation_count: 25}
+    entities: []
+- id: t1q03
+  tier: 1
+  dataset: tpch
+  reference_scale: sf0.01
+  question: What is the total sale amount across all order lines?
+  gold_sql: SELECT ROUND(SUM(sale_amount), 2) AS total_sale_amount FROM order_lines
+  ordered: false
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {total_sale_amount: "2152189760.47"}
+    entities: []
+- id: t1q04
+  tier: 1
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many customers belong to the HOUSEHOLD segment?
+  gold_sql: SELECT COUNT(*) AS household_customers FROM customers WHERE market_segment = 'HOUSEHOLD'
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {household_customers: 294}
+    entities: [HOUSEHOLD]
+- id: t1q05
+  tier: 1
+  dataset: tpch
+  reference_scale: sf0.01
+  question: What is the average retail price of a part?
+  gold_sql: SELECT ROUND(AVG(retail_price), 2) AS average_retail_price FROM parts
+  ordered: false
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {average_retail_price: "1400.5"}
+    entities: []

@@ -1,0 +1,20 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+data/
+runs/
+results/
+*.parquet
+
+# Cursor / local agent tooling (not part of the project)
+.cursor/
+.cursorignore
+.agents/
+AGENTS.md
+agent-transcripts/

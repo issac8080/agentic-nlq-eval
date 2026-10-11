@@ -1,0 +1,107 @@
+# Scaffold: 5 original tier-4 questions (period comparisons and top contributors). Gold values are SF0.01.
+- id: t4q01
+  tier: 4
+  dataset: tpch
+  reference_scale: sf0.01
+  question: What was the total sale amount of lines shipped in 1994, and in 1995?
+  gold_sql: >
+    SELECT
+      ROUND(SUM(CASE WHEN ship_date >= DATE '1994-01-01' AND ship_date < DATE '1995-01-01' THEN sale_amount ELSE 0 END), 2) AS sale_1994,
+      ROUND(SUM(CASE WHEN ship_date >= DATE '1995-01-01' AND ship_date < DATE '1996-01-01' THEN sale_amount ELSE 0 END), 2) AS sale_1995
+    FROM order_lines
+  ordered: false
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {sale_1994: "339830244.26", sale_1995: "316126099.35"}
+    entities: []
+- id: t4q02
+  tier: 4
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Which three customers contributed the most sale amount on orders placed in 1995?
+  gold_sql: >
+    SELECT c.customer_name, ROUND(SUM(ol.sale_amount), 2) AS total_sale_amount
+    FROM order_lines AS ol
+    INNER JOIN sales_orders AS o ON ol.order_key = o.order_key
+    INNER JOIN customers AS c ON o.customer_key = c.customer_key
+    WHERE o.order_date >= DATE '1995-01-01' AND o.order_date < DATE '1996-01-01'
+    GROUP BY c.customer_name
+    ORDER BY total_sale_amount DESC, c.customer_name
+    LIMIT 3
+  ordered: true
+  numeric_tolerance: 0.01
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {customer_name: "Customer#000000349", total_sale_amount: "1889835.57"}
+      - {customer_name: "Customer#000000814", total_sale_amount: "1436561.57"}
+      - {customer_name: "Customer#000001120", total_sale_amount: "1408006.19"}
+    entities: ["Customer#000000349", "Customer#000000814", "Customer#000001120"]
+- id: t4q03
+  tier: 4
+  dataset: tpch
+  reference_scale: sf0.01
+  question: Which month of 1996 had the most orders?
+  gold_sql: >
+    SELECT month(order_date) AS order_month, COUNT(*) AS order_count
+    FROM sales_orders
+    WHERE order_date >= DATE '1996-01-01' AND order_date < DATE '1997-01-01'
+    GROUP BY month(order_date)
+    ORDER BY order_count DESC, order_month
+    LIMIT 1
+  ordered: true
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {order_month: 8, order_count: 210}
+    entities: []
+- id: t4q04
+  tier: 4
+  dataset: tpch
+  reference_scale: sf0.01
+  question: What share of 1995 sale amount came from the single largest nation?
+  gold_sql: >
+    WITH nation_sales AS (
+      SELECT g.nation_name, SUM(ol.sale_amount) AS total_sale_amount
+      FROM order_lines AS ol
+      INNER JOIN sales_orders AS o ON ol.order_key = o.order_key
+      INNER JOIN customers AS c ON o.customer_key = c.customer_key
+      INNER JOIN geography AS g ON c.nation_key = g.nation_key
+      WHERE o.order_date >= DATE '1995-01-01' AND o.order_date < DATE '1996-01-01'
+      GROUP BY g.nation_name
+    )
+    SELECT ROUND(MAX(total_sale_amount) / SUM(total_sale_amount), 4) AS top_nation_share
+    FROM nation_sales
+  ordered: false
+  numeric_tolerance: 0.0001
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {top_nation_share: "0.0487"}
+    entities: []
+- id: t4q05
+  tier: 4
+  dataset: tpch
+  reference_scale: sf0.01
+  question: How many more orders were placed in 1994 than in 1993?
+  gold_sql: >
+    SELECT
+      SUM(CASE WHEN order_date >= DATE '1994-01-01' AND order_date < DATE '1995-01-01' THEN 1 ELSE 0 END)
+      - SUM(CASE WHEN order_date >= DATE '1993-01-01' AND order_date < DATE '1994-01-01' THEN 1 ELSE 0 END)
+      AS order_growth
+    FROM sales_orders
+  ordered: false
+  numeric_tolerance: 0
+  rounding: half_even
+  column_order: name
+  gold_answer:
+    values:
+      - {order_growth: -4}
+    entities: []

@@ -1,0 +1,46 @@
+# Model name and version are configured only here (or via NLQ_LLM_* overrides).
+prompts_version: "1.0.0"
+
+llm:
+  provider: openai
+  model: REPLACE_ME
+  model_version: REPLACE_ME
+  temperature: 0
+  api_key_env: NLQ_LLM_API_KEY
+  max_api_retries: 5
+
+paths:
+  data_dir: data
+  runs_dir: runs
+  results_dir: results
+  prompts_dir: prompts
+
+tpch:
+  # --all generates these. SF10 is about 60M lineitem rows and stays opt-in.
+  scales: [0.01, 0.1, 1]
+  optional_scales: [10]
+  # dbgen has no seed argument. children=1 keeps the reference generator single-step.
+  children: 1
+
+spark:
+  app_name: nlq-eval
+  sql_timeout_s: 120
+  result_row_cap: 200
+
+experiment:
+  seed: 42
+  repeats: 3
+  # Empty or null means no budget cap. Phase 8 aborts before exceeding this.
+  budget_usd: null
+  warmup_discard: 1
+
+s3:
+  max_sql_retries: 3
+  max_answer_revisions: 2
+  enable_sql_validation: true
+  enable_answer_verification: true
+
+pricing:
+  # Placeholder rates. Replace with the provider's prices before cost guards.
+  input_usd_per_million: 0.0
+  output_usd_per_million: 0.0
